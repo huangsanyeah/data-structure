@@ -1,12 +1,21 @@
 package com.ImplementationOfLoopQueue;
-
+/***
+ * @description 循环队列实现 循环队列就是为了shu'j
+ * @author huangweiyue
+ * @date Created in 2019/6/1-20:18
+ */
 public class LoopQueue<E> implements Queue<E> {
 
     private E[] data;
-    private int front, tail;
-    private int size;  // 有兴趣的同学，在完成这一章后，可以思考一下：
-                       // LoopQueue中不声明size，如何完成所有的逻辑？
-                       // 这个问题可能会比大家想象的要难一点点：）
+    /**
+     * 循环队列的第1个元素位置
+     */
+    private int front;
+    /**
+     * 环队列的最后1个元素的【后一个元素】位置
+     */
+    private int tail;
+    private int size;
 
     public LoopQueue(int capacity){
         data = (E[])new Object[capacity + 1];
@@ -35,11 +44,14 @@ public class LoopQueue<E> implements Queue<E> {
 
     @Override
     public void enqueue(E e){
-
-        if((tail + 1) % data.length == front)
+        //入队 首先看队列是否是满的 如果满了 就扩容
+        if((tail + 1) % data.length == front) {
+            //扩容 data.length是浪费了1个空间的，所以这里用getCapacity 来取[data.length - 1]长度
             resize(getCapacity() * 2);
-
+        }
+        //tail 指向最后一个元素的位置 注意循环队列是浪费了1个空间的！
         data[tail] = e;
+        //维护下tail tail本来应该是++ 但是因为是循环队列 所以需要(tail + 1) % data.length（联想钟表的时钟）
         tail = (tail + 1) % data.length;
         size ++;
     }
@@ -47,33 +59,43 @@ public class LoopQueue<E> implements Queue<E> {
     @Override
     public E dequeue(){
 
-        if(isEmpty())
+        if(isEmpty()) {
             throw new IllegalArgumentException("Cannot dequeue from an empty queue.");
-
+        }
         E ret = data[front];
         data[front] = null;
         front = (front + 1) % data.length;
         size --;
-        if(size == getCapacity() / 4 && getCapacity() / 2 != 0)
+        if(size == getCapacity() / 4 && getCapacity() / 2 != 0) {
             resize(getCapacity() / 2);
+        }
         return ret;
     }
 
+    /**
+     * 获取队首元素
+     * @return
+     */
     @Override
     public E getFront(){
-        if(isEmpty())
+        if(isEmpty()) {
             throw new IllegalArgumentException("Queue is empty.");
+        }
         return data[front];
     }
 
     private void resize(int newCapacity){
 
         E[] newData = (E[])new Object[newCapacity + 1];
-        for(int i = 0 ; i < size ; i ++)
+        for(int i = 0 ; i < size ; i ++) {
+            //data中的元素对于newData[]中的元素是有front的偏移量的，所以是data[(i + front)
+            //但是由于是循环队列 data[(i + front)可能超过data.length产生越界 所以需要%对length取余
             newData[i] = data[(i + front) % data.length];
+        }
 
         data = newData;
         front = 0;
+        //size（循环队列中的元素个数）是不需要动的 因为扩容过程中 数据个数是没变的（无元素入队 出队）
         tail = size;
     }
 
@@ -85,8 +107,9 @@ public class LoopQueue<E> implements Queue<E> {
         res.append("front [");
         for(int i = front ; i != tail ; i = (i + 1) % data.length){
             res.append(data[i]);
-            if((i + 1) % data.length != tail)
+            if((i + 1) % data.length != tail) {
                 res.append(", ");
+            }
         }
         res.append("] tail");
         return res.toString();

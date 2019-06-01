@@ -28,6 +28,10 @@ public class LoopQueue<E> implements Queue<E> {
         return data.length - 1;
     }
 
+    /**
+     * front == tail 就可以为空了
+     * @return
+     */
     @Override
     public boolean isEmpty(){
         return front == tail;
